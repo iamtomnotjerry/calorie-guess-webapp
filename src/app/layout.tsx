@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/opengraph-image.png',
+        url: '/social-preview.png',
         width: 1200,
         height: 630,
         alt: 'CalorieGuess AI Preview',
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: "CalorieGuess AI - Phân tích dinh dưỡng chính xác",
     description: "Trình phân tích hình ảnh thực phẩm bằng AI Gemini cho kết quả chính xác, không phóng đại.",
-    images: ['/opengraph-image.png'],
+    images: ['/social-preview.png'],
   },
 };
 
