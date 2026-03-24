@@ -1,30 +1,94 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Info, CheckCircle, AlertCircle } from 'lucide-react';
+import { 
+  CheckCircle, 
+  AlertCircle, 
+  Zap, 
+  Activity, 
+  Heart, 
+  AlertTriangle, 
+  Lightbulb,
+  Beef,
+  Wheat,
+  Droplets
+} from 'lucide-react';
 
 interface ResultDisplayProps {
   text: string;
   loading: boolean;
   error?: string | null;
+  language?: string;
 }
 
-export default function ResultDisplay({ text, loading, error }: ResultDisplayProps) {
+const translations: Record<string, any> = {
+  'Tiếng Việt': {
+    analyzing: "Đang thẩm định món ăn...",
+    scanning: "AI đang quét từng pixel để tính toán calo",
+    completed: "Đã hoàn tất phân tích",
+    totalEnergy: "Tổng năng lượng",
+    nutritionPros: "Ưu điểm dinh dưỡng",
+    nutritionCons: "Hạn chế cần lưu ý",
+    aiAdvice: "Lời khuyên từ AI",
+    disclaimer: "Khuyến nghị chỉ mang tính chất tham khảo • Độ chính xác dựa trên hình ảnh",
+    errorTitle: "Đã xảy ra lỗi"
+  },
+  'English': {
+    analyzing: "Analyzing dish...",
+    scanning: "AI is scanning every pixel to calculate calories",
+    completed: "Analysis Complete",
+    totalEnergy: "Total Energy",
+    nutritionPros: "Nutritional Strengths",
+    nutritionCons: "Points to Note",
+    aiAdvice: "AI Expert Advice",
+    disclaimer: "Recommendations are for reference only • Accuracy based on image",
+    errorTitle: "Error Occurred"
+  },
+  '日本語': {
+    analyzing: "料理を分析中...",
+    scanning: "AIがピクセルごとにスキャンしてカロリーを計算しています",
+    completed: "分析完了",
+    totalEnergy: "総エネルギー",
+    nutritionPros: "栄養の利点",
+    nutritionCons: "注意点",
+    aiAdvice: "AIのアドバイス",
+    disclaimer: "推奨事項は参考用です • 画像に基づく精度",
+    errorTitle: "エラーが発生しました"
+  },
+  '한국어': {
+    analyzing: "음식 분석 중...",
+    scanning: "AI가 픽셀 단위로 스캔하여 칼로리를 계산하고 있습니다",
+    completed: "분석 완료",
+    totalEnergy: "총 에너지",
+    nutritionPros: "영양학적 장점",
+    nutritionCons: "주의 사항",
+    aiAdvice: "AI 조언",
+    disclaimer: "권장 사항은 참고용입니다 • 이미지 기반 정확도",
+    errorTitle: "오류 발생"
+  }
+};
+
+export default function ResultDisplay({ text, loading, error, language = 'Tiếng Việt' }: ResultDisplayProps) {
+  const t = translations[language] || translations['English'];
+
   if (loading) {
     return (
-      <div className="w-full max-w-xl glass-card p-12 flex flex-col items-center justify-center space-y-4">
-        <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
-        <p className="text-white/60 animate-pulse font-medium">Đang phân tích hình ảnh...</p>
+      <div className="w-full max-w-2xl glass-card p-12 flex flex-col items-center justify-center space-y-4">
+        <div className="w-16 h-16 border-4 border-blue-500/10 border-t-blue-500 rounded-full animate-spin" />
+        <div className="text-center">
+          <p className="text-xl font-bold gradient-text animate-pulse">{t.analyzing}</p>
+          <p className="text-white/40 text-sm mt-2">{t.scanning}</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="w-full max-w-xl glass-card p-8 border-red-500/20 bg-red-500/5 flex items-start gap-4">
+      <div className="w-full max-w-2xl glass-card p-8 border-red-500/20 bg-red-500/5 flex items-start gap-4">
         <AlertCircle className="w-6 h-6 text-red-400 mt-1 flex-shrink-0" />
         <div>
-          <h3 className="text-lg font-semibold text-red-400">Đã xảy ra lỗi</h3>
+          <h3 className="text-lg font-semibold text-red-400">{t.errorTitle}</h3>
           <p className="text-white/60 text-sm mt-1">{error}</p>
         </div>
       </div>
@@ -33,41 +97,133 @@ export default function ResultDisplay({ text, loading, error }: ResultDisplayPro
 
   if (!text) return null;
 
-  // Simple parsing for list items
-  const lines = text.split('\n').filter(line => line.trim().length > 0);
+  let data;
+  try {
+    const cleaned = text.replace(/```json\n?/, '').replace(/\n?```/, '').trim();
+    data = JSON.parse(cleaned);
+  } catch (e) {
+    // Fallback if parsing fails
+    return (
+      <div className="w-full max-w-2xl glass-card p-8 text-white/60 whitespace-pre-wrap">
+        {text}
+      </div>
+    );
+  }
+
+  const macroIcons: Record<string, any> = {
+    'Protein': Beef,
+    'Carbs': Wheat,
+    'Fat': Droplets,
+    'Chất béo': Droplets,
+    'Fat (Chất béo)': Droplets,
+    'Tinh bột': Wheat
+  };
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="w-full max-w-xl glass-card p-8 space-y-6"
+      initial={{ opacity: 0, scale: 0.98, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      className="w-full max-w-2xl flex flex-col gap-6"
     >
-      <div className="flex items-center gap-3 border-b border-white/10 pb-6">
-        <div className="p-2 rounded-lg bg-green-500/10">
-          <CheckCircle className="w-6 h-6 text-green-400" />
+      {/* Header & Total Calories */}
+      <div className="glass-card p-8 flex flex-col md:flex-row justify-between items-center gap-6 overflow-hidden relative">
+        <div className="absolute top-0 right-0 p-12 bg-blue-500/10 blur-[80px] rounded-full -z-10" />
+        <div className="space-y-2 text-center md:text-left">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-xs font-bold uppercase tracking-wider">
+            <CheckCircle className="w-3.6 h-3.6" />
+            {t.completed}
+          </div>
+          <h2 className="text-3xl font-black text-white">{data.dishName}</h2>
         </div>
-        <h3 className="text-2xl font-bold gradient-text">Kết quả phân tích</h3>
+        
+        <div className="flex flex-col items-center bg-white/5 border border-white/10 p-6 rounded-3xl min-w-[160px]">
+          <span className="text-white/40 text-xs uppercase font-bold tracking-widest mb-1">{t.totalEnergy}</span>
+          <div className="flex items-baseline gap-1">
+            <span className="text-5xl font-black gradient-text">{data.calories.value}</span>
+            <span className="text-sm font-bold text-white/40">{data.calories.unit}</span>
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-4">
-        {lines.map((line, idx) => (
-          <motion.div
-            key={idx}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: idx * 0.1 }}
-            className="flex items-start gap-3 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors"
-          >
-            <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-400" />
-            <p className="text-white/80 leading-relaxed font-medium">{line.replace(/^\d+\.\s*/, '').replace(/^-\s*/, '')}</p>
-          </motion.div>
-        ))}
+      {/* Macronutrients Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {data.macros.map((m: any, i: number) => {
+          const Icon = macroIcons[m.name] || Activity;
+          return (
+            <motion.div 
+              key={i}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 * i }}
+              className="glass-card p-5 space-y-3 group hover:bg-white/10 transition-all cursor-default"
+            >
+              <div className="flex items-center justify-between">
+                <div className="p-2 rounded-lg bg-white/5 group-hover:bg-blue-500/20 transition-colors">
+                  <Icon className="w-5 h-5 text-blue-400" />
+                </div>
+                <span className="text-xl font-bold text-white">{m.value}</span>
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-white/60">{m.name}</h4>
+                <p className="text-xs text-white/20 leading-tight mt-1">{m.details}</p>
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
 
-      <div className="pt-4 flex items-center gap-2 text-white/40 text-xs italic">
-        <Info className="w-4 h-4" />
-        <span>Kết quả chỉ mang tính chất tham khảo dựa trên AI.</span>
+      {/* Health Assessment Details */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Pros */}
+        <div className="glass-card p-6 border-green-500/10 space-y-4">
+          <div className="flex items-center gap-2 text-green-400 font-bold text-sm uppercase tracking-wider">
+            <Heart className="w-4 h-4" />
+            {t.nutritionPros}
+          </div>
+          <ul className="space-y-2">
+            {data.healthAssessment.positives.map((p: string, i: number) => (
+              <li key={i} className="flex items-start gap-2 text-sm text-white/60">
+                <div className="mt-1.5 w-1 h-1 rounded-full bg-green-500 flex-shrink-0" />
+                {p}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Cons */}
+        <div className="glass-card p-6 border-yellow-500/10 space-y-4">
+          <div className="flex items-center gap-2 text-yellow-400 font-bold text-sm uppercase tracking-wider">
+            <AlertTriangle className="w-4 h-4" />
+            {t.nutritionCons}
+          </div>
+          <ul className="space-y-2">
+            {data.healthAssessment.negatives.map((n: string, i: number) => (
+              <li key={i} className="flex items-start gap-2 text-sm text-white/60">
+                <div className="mt-1.5 w-1 h-1 rounded-full bg-yellow-500 flex-shrink-0" />
+                {n}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
+
+      {/* Expert Advice Block */}
+      <div className="glass-card p-6 bg-blue-500/5 border-blue-500/20 relative overflow-hidden group">
+        <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
+          <Lightbulb className="w-32 h-32 text-blue-400" />
+        </div>
+        <div className="flex items-center gap-2 text-blue-400 font-bold text-sm uppercase tracking-wider mb-3">
+          <Zap className="w-4 h-4" />
+          {t.aiAdvice}
+        </div>
+        <p className="text-white/80 leading-relaxed relative z-10 italic">
+          "{data.healthAssessment.advice}"
+        </p>
+      </div>
+
+      <p className="text-center text-white/20 text-[10px] uppercase tracking-widest font-bold">
+        {t.disclaimer}
+      </p>
     </motion.div>
   );
 }

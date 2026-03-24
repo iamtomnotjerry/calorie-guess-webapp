@@ -112,6 +112,7 @@ export default function Home() {
                 text={result || ''} 
                 loading={loading} 
                 error={error} 
+                language={selectedLanguage}
               />
             )}
           </AnimatePresence>
