@@ -39,7 +39,7 @@ export async function analyzeImage(base64Image: string, language: string = 'Tiáº
     // Check Per-5-Minute Limit (2 requests / 5 mins)
     const usage5Min = await redis.incr(fiveMinKey);
     if (usage5Min === 1) await redis.expire(fiveMinKey, 300); // 5 minutes (300s)
-    if (usage5Min > 10) {
+    if (usage5Min > 2) {
       console.warn(`>>> IP ${ip} blocked: 5-minute limit reached (2/5mins)`);
       return { 
         success: false, 
