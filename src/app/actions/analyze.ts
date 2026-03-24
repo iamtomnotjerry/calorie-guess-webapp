@@ -16,16 +16,29 @@ export async function analyzeImage(base64Image: string, language: string = 'Ti�
 
   // 100% Persistent Rate Limiting with Vercel KV
   try {
-    const today = new Date().toISOString().split('T')[0];
-    const rateLimitKey = `ratelimit:${ip}:${today}`;
-    const usage = await kv.incr(rateLimitKey);
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    const minuteKey = `ratelimit:${ip}:min:${Math.floor(now.getTime() / 60000)}`;
+    const dailyKey = `ratelimit:${ip}:day:${today}`;
     
-    // Set expiry for the first request of the day
-    if (usage === 1) {
-      await kv.expire(rateLimitKey, 86400); // 24 hours
+    // Check Per-Minute Limit (RPM: 2)
+    const rpmUsage = await kv.incr(minuteKey);
+    if (rpmUsage === 1) await kv.expire(minuteKey, 60);
+    if (rpmUsage > 2) {
+      console.warn(`>>> IP ${ip} blocked: Minute limit reached (2/minute)`);
+      return { 
+        success: false, 
+        error: language === 'Tiếng Việt' 
+          ? 'Bạn đang gửi yêu cầu quá nhanh. Vui lòng đợi 1 phút rồi thử lại.' 
+          : 'You are sending requests too fast. Please wait 1 minute and try again.' 
+      };
     }
 
-    if (usage > 15) {
+    // Check Daily Limit (RPD: 15)
+    const dailyUsage = await kv.incr(dailyKey);
+    if (dailyUsage === 1) await kv.expire(dailyKey, 86400); 
+
+    if (dailyUsage > 15) {
       console.warn(`>>> IP ${ip} blocked: Daily limit reached (15/15)`);
       return { 
         success: false, 
