@@ -19,14 +19,20 @@ export default function Home() {
     setError(null);
     setResult(null);
 
-    const res = await analyzeImage(base64, selectedLanguage);
-    
-    if (res.success) {
-      setResult(res.text || '');
-    } else {
-      setError(res.error || 'Failed to analyze image');
+    try {
+      const res = await analyzeImage(base64, selectedLanguage);
+      
+      if (res.success) {
+        setResult(res.text || '');
+      } else {
+        setError(res.error || 'Có lỗi xảy ra khi phân tích hình ảnh.');
+      }
+    } catch (err: any) {
+      console.error('Analysis error:', err);
+      setError('Không thể kết nối với máy chủ AI. Vui lòng kiểm tra lại kết nối mạng hoặc thử lại sau.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
