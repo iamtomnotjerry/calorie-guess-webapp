@@ -2,7 +2,21 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { headers } from 'next/headers';
-import { kv } from '@vercel/kv';
+import { createClient } from 'redis';
+
+// Initialize Redis Client for standard Redis (not Vercel KV REST)
+const redisClient = createClient({
+  url: process.env.REDIS_URL
+});
+
+redisClient.on('error', (err) => console.error('Redis Client Error', err));
+
+async function getRedis() {
+  if (!redisClient.isOpen) {
+    await redisClient.connect();
+  }
+  return redisClient;
+}
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
@@ -14,16 +28,17 @@ export async function analyzeImage(base64Image: string, language: string = 'Tiáº
   
   console.log(`>>> New analysis request from IP: ${ip} | Device: ${userAgent}`);
 
-  // 100% Persistent Rate Limiting with Vercel KV
+  // 100% Persistent Rate Limiting with Redis
   try {
+    const redis = await getRedis();
     const now = new Date();
     const today = now.toISOString().split('T')[0];
     const minuteKey = `ratelimit:${ip}:min:${Math.floor(now.getTime() / 60000)}`;
     const dailyKey = `ratelimit:${ip}:day:${today}`;
     
     // Check Per-Minute Limit (RPM: 2)
-    const rpmUsage = await kv.incr(minuteKey);
-    if (rpmUsage === 1) await kv.expire(minuteKey, 60);
+    const rpmUsage = await redis.incr(minuteKey);
+    if (rpmUsage === 1) await redis.expire(minuteKey, 60);
     if (rpmUsage > 2) {
       console.warn(`>>> IP ${ip} blocked: Minute limit reached (2/minute)`);
       return { 
@@ -35,8 +50,8 @@ export async function analyzeImage(base64Image: string, language: string = 'Tiáº
     }
 
     // Check Daily Limit (RPD: 15)
-    const dailyUsage = await kv.incr(dailyKey);
-    if (dailyUsage === 1) await kv.expire(dailyKey, 86400); 
+    const dailyUsage = await redis.incr(dailyKey);
+    if (dailyUsage === 1) await redis.expire(dailyKey, 86400); 
 
     if (dailyUsage > 15) {
       console.warn(`>>> IP ${ip} blocked: Daily limit reached (15/15)`);
@@ -48,9 +63,7 @@ export async function analyzeImage(base64Image: string, language: string = 'Tiáº
       };
     }
   } catch (error) {
-    console.error('KV Rate Limit error:', error);
-    // Continue anyway if KV fails? Or block? 
-    // Usually better to continue to avoid breaking the app if DB is down temporarily.
+    console.error('Redis Rate Limit error:', error);
   }
 
   // Model rotation list based on your specific quotas:
