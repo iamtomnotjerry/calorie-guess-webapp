@@ -52,7 +52,7 @@ export default function Home() {
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium mb-4">
             <Zap className="w-4 h-4 fill-current" />
-            <span>Powered by Gemini 1.5 Flash</span>
+            <span>Powered by Gemini</span>
           </div>
           <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-4">
             Calorie<span className="gradient-text">Guess</span> AI

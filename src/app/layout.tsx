@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "CalorieGuess AI - Phân tích dinh dưỡng chính xác",
   description: "Trình phân tích hình ảnh thực phẩm bằng AI Gemini cho kết quả chính xác, không phóng đại.",
+  icons: {
+    icon: '/icon.png',
+  },
 };
 
 export default function RootLayout({
