@@ -17,6 +17,7 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://calorie-guess-webapp.vercel.app'),
   title: "CalorieGuess AI - Phân tích dinh dưỡng chính xác",
   description: "Trình phân tích hình ảnh thực phẩm bằng AI Gemini cho kết quả chính xác, không phóng đại.",
+  keywords: ["dinh dưỡng", "calo", "gemini ai", "phân tích món ăn", "sức khỏe"],
   icons: {
     icon: '/icon.png',
   },
@@ -27,6 +28,20 @@ export const metadata: Metadata = {
     siteName: 'CalorieGuess AI',
     locale: 'vi_VN',
     type: 'website',
+    images: [
+      {
+        url: '/opengraph-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'CalorieGuess AI Preview',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "CalorieGuess AI - Phân tích dinh dưỡng chính xác",
+    description: "Trình phân tích hình ảnh thực phẩm bằng AI Gemini cho kết quả chính xác, không phóng đại.",
+    images: ['/opengraph-image.png'],
   },
 };
 
