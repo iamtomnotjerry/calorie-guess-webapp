@@ -33,19 +33,19 @@ export async function analyzeImage(base64Image: string, language: string = 'Ti�
     const redis = await getRedis();
     const now = new Date();
     const today = now.toISOString().split('T')[0];
-    const minuteKey = `ratelimit:${ip}:min:${Math.floor(now.getTime() / 60000)}`;
+    const fiveMinKey = `ratelimit:${ip}:5min:${Math.floor(now.getTime() / 300000)}`;
     const dailyKey = `ratelimit:${ip}:day:${today}`;
     
-    // Check Per-Minute Limit (RPM: 2)
-    const rpmUsage = await redis.incr(minuteKey);
-    if (rpmUsage === 1) await redis.expire(minuteKey, 60);
-    if (rpmUsage > 2) {
-      console.warn(`>>> IP ${ip} blocked: Minute limit reached (2/minute)`);
+    // Check Per-5-Minute Limit (2 requests / 5 mins)
+    const usage5Min = await redis.incr(fiveMinKey);
+    if (usage5Min === 1) await redis.expire(fiveMinKey, 300); // 5 minutes (300s)
+    if (usage5Min > 2) {
+      console.warn(`>>> IP ${ip} blocked: 5-minute limit reached (2/5mins)`);
       return { 
         success: false, 
         error: language === 'Tiếng Việt' 
-          ? 'Bạn đang gửi yêu cầu quá nhanh. Vui lòng đợi 1 phút rồi thử lại.' 
-          : 'You are sending requests too fast. Please wait 1 minute and try again.' 
+          ? 'Bạn đang gửi yêu cầu quá nhanh. Vui lòng đợi 5 phút rồi thử lại.' 
+          : 'You are sending requests too fast. Please wait 5 minutes and try again.' 
       };
     }
 
