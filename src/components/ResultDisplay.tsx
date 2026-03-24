@@ -31,7 +31,12 @@ const translations: Record<string, any> = {
     nutritionCons: "Hạn chế cần lưu ý",
     aiAdvice: "Lời khuyên từ AI",
     disclaimer: "Khuyến nghị chỉ mang tính chất tham khảo • Độ chính xác dựa trên hình ảnh",
-    errorTitle: "Đã xảy ra lỗi"
+    errorTitle: "Đã xảy ra lỗi",
+    macros: {
+      Protein: "Chất đạm",
+      Carbs: "Tinh bột",
+      Fat: "Chất béo"
+    }
   },
   'English': {
     analyzing: "Analyzing dish...",
@@ -42,7 +47,12 @@ const translations: Record<string, any> = {
     nutritionCons: "Points to Note",
     aiAdvice: "AI Expert Advice",
     disclaimer: "Recommendations are for reference only • Accuracy based on image",
-    errorTitle: "Error Occurred"
+    errorTitle: "Error Occurred",
+    macros: {
+      Protein: "Protein",
+      Carbs: "Carbs",
+      Fat: "Fat"
+    }
   },
   '日本語': {
     analyzing: "料理を分析中...",
@@ -53,7 +63,12 @@ const translations: Record<string, any> = {
     nutritionCons: "注意点",
     aiAdvice: "AIのアドバイス",
     disclaimer: "推奨事項は参考用です • 画像に基づく精度",
-    errorTitle: "エラーが発生しました"
+    errorTitle: "エラーが発生しました",
+    macros: {
+      Protein: "タンパク質",
+      Carbs: "炭水化物",
+      Fat: "脂質"
+    }
   },
   '한국어': {
     analyzing: "음식 분석 중...",
@@ -64,7 +79,12 @@ const translations: Record<string, any> = {
     nutritionCons: "주의 사항",
     aiAdvice: "AI 조언",
     disclaimer: "권장 사항은 참고용입니다 • 이미지 기반 정확도",
-    errorTitle: "오류 발생"
+    errorTitle: "오류 발생",
+    macros: {
+      Protein: "단백질",
+      Carbs: "탄수화물",
+      Fat: "지방"
+    }
   }
 };
 
@@ -164,7 +184,7 @@ export default function ResultDisplay({ text, loading, error, language = 'Tiến
                 <span className="text-xl font-bold text-white">{m.value}</span>
               </div>
               <div>
-                <h4 className="text-sm font-bold text-white/60">{m.name}</h4>
+                <h4 className="text-sm font-bold text-white/60">{t.macros[m.name] || m.name}</h4>
                 <p className="text-xs text-white/20 leading-tight mt-1">{m.details}</p>
               </div>
             </motion.div>
