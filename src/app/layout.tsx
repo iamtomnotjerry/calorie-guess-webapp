@@ -14,10 +14,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://calorie-guess-webapp.vercel.app'),
   title: "CalorieGuess AI - Phân tích dinh dưỡng chính xác",
   description: "Trình phân tích hình ảnh thực phẩm bằng AI Gemini cho kết quả chính xác, không phóng đại.",
   icons: {
     icon: '/icon.png',
+  },
+  openGraph: {
+    title: "CalorieGuess AI - Phân tích dinh dưỡng chính xác",
+    description: "Trình phân tích hình ảnh thực phẩm bằng AI Gemini cho kết quả chính xác, không phóng đại.",
+    url: 'https://calorie-guess-webapp.vercel.app',
+    siteName: 'CalorieGuess AI',
+    locale: 'vi_VN',
+    type: 'website',
   },
 };
 
