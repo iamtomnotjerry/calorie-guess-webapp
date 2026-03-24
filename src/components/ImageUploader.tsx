@@ -110,18 +110,19 @@ export default function ImageUploader({ onImageSelected, onReset }: ImageUploade
             animate={{ opacity: 1, scale: 1 }}
             className="relative rounded-3xl overflow-hidden glass-card group"
           >
-            <img src={preview} alt="Selected" className="w-full h-[400px] object-cover" />
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-              <button
-                onClick={() => {
-                   setPreview(null);
-                   onReset();
-                }}
-                className="p-3 rounded-full bg-red-500 text-white hover:scale-110 transition-transform"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
+            <img src={preview} alt="Selected" className="w-full h-[300px] md:h-[400px] object-cover" />
+            
+            {/* Delete/Reset Button - Now always visible and in top-right corner */}
+            <button
+              onClick={() => {
+                setPreview(null);
+                onReset();
+              }}
+              className="absolute top-4 right-4 p-2 rounded-full bg-black/60 backdrop-blur-md text-white border border-white/20 hover:bg-red-500 hover:border-red-500 transition-all z-10"
+              aria-label="Remove image"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
