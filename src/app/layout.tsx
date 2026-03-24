@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/social-preview.png',
+        url: 'https://calorie-guess-webapp.vercel.app/social-preview.png',
         width: 1200,
         height: 630,
         alt: 'CalorieGuess AI Preview',
