@@ -2,6 +2,7 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { headers } from 'next/headers';
+import { kv } from '@vercel/kv';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
@@ -12,6 +13,32 @@ export async function analyzeImage(base64Image: string, language: string = 'Ti�
   const userAgent = headersList.get('user-agent') || 'Unknown Device';
   
   console.log(`>>> New analysis request from IP: ${ip} | Device: ${userAgent}`);
+
+  // 100% Persistent Rate Limiting with Vercel KV
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const rateLimitKey = `ratelimit:${ip}:${today}`;
+    const usage = await kv.incr(rateLimitKey);
+    
+    // Set expiry for the first request of the day
+    if (usage === 1) {
+      await kv.expire(rateLimitKey, 86400); // 24 hours
+    }
+
+    if (usage > 15) {
+      console.warn(`>>> IP ${ip} blocked: Daily limit reached (15/15)`);
+      return { 
+        success: false, 
+        error: language === 'Tiếng Việt' 
+          ? 'Bạn đã hết 15 lượt miễn phí của hôm nay. Hãy quay lại vào ngày mai nhé!' 
+          : 'You have reached your daily limit of 15 requests. Please come back tomorrow!' 
+      };
+    }
+  } catch (error) {
+    console.error('KV Rate Limit error:', error);
+    // Continue anyway if KV fails? Or block? 
+    // Usually better to continue to avoid breaking the app if DB is down temporarily.
+  }
 
   // Model rotation list based on your specific quotas:
   // 1. Gemini 3 Flash (20 RPD) - High quality
