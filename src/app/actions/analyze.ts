@@ -1,10 +1,18 @@
 'use server';
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { headers } from 'next/headers';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 export async function analyzeImage(base64Image: string, language: string = 'Tiếng Việt') {
+  // Get identifying info for logging
+  const headersList = await headers();
+  const ip = headersList.get('x-forwarded-for') || 'Unknown IP';
+  const userAgent = headersList.get('user-agent') || 'Unknown Device';
+  
+  console.log(`>>> New analysis request from IP: ${ip} | Device: ${userAgent}`);
+
   // Model rotation list based on your specific quotas:
   // 1. Gemini 3 Flash (20 RPD) - High quality
   // 2. Gemini 2.5 Flash (20 RPD) - High quality fallback
