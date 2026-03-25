@@ -181,17 +181,24 @@ Important rules:
 
     } catch (error: any) {
       lastError = error;
-      // If it's a rate limit error (429), try the next model
-      if (error.message?.includes('429') || error.message?.includes('Too Many Requests') || error.status === 429) {
-        console.warn(`Model ${modelName} hit rate limit. Trying next model...`);
+      const errMsg = error.message || '';
+      const status = error.status || 0;
+
+      // Rotate model on: Rate Limit (429), Model Not Found (404), or Service Unavailable (503)
+      if (
+        status === 429 || status === 404 || status === 503 ||
+        errMsg.includes('429') || errMsg.includes('404') || errMsg.includes('503') ||
+        errMsg.toLowerCase().includes('too many requests') ||
+        errMsg.toLowerCase().includes('service unavailable') ||
+        errMsg.toLowerCase().includes('high demand') ||
+        errMsg.toLowerCase().includes('not found')
+      ) {
+        console.warn(`Model ${modelName} issue: ${errMsg}. Trying next model in rotation...`);
         continue;
       }
-      // For other errors, log and potentially stop
-      console.error(`Error with model ${modelName}:`, error.message);
-      // If it's a "model not found" or similar configuration error, try next anyway
-      if (error.message?.includes('not found') || error.message?.includes('404')) {
-        continue;
-      }
+
+      // For fatal/unexpected errors, log and stop
+      console.error(`Fatal error with model ${modelName}:`, errMsg);
       break; 
     }
   }
