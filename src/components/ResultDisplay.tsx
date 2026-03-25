@@ -11,7 +11,8 @@ import {
   Lightbulb,
   Beef,
   Wheat,
-  Droplets
+  Droplets,
+  Utensils
 } from 'lucide-react';
 
 interface ResultDisplayProps {
@@ -32,6 +33,8 @@ const translations: Record<string, any> = {
     aiAdvice: "Lời khuyên từ AI",
     disclaimer: "Khuyến nghị chỉ mang tính chất tham khảo • Độ chính xác dựa trên hình ảnh",
     errorTitle: "Đã xảy ra lỗi",
+    overloadTitle: "Đầu bếp AI đang bận tí! 👨‍🍳",
+    overloadMessage: "Hệ thống đang phục vụ quá nhiều thực khách. Bạn vui lòng đợi ít phút rồi thử lại nhé!",
     macros: {
       Protein: "Chất đạm",
       Carbs: "Tinh bột",
@@ -48,6 +51,8 @@ const translations: Record<string, any> = {
     aiAdvice: "AI Expert Advice",
     disclaimer: "Recommendations are for reference only • Accuracy based on image",
     errorTitle: "Error Occurred",
+    overloadTitle: "AI Chef is a bit busy! 👨‍🍳",
+    overloadMessage: "The kitchen is full right now. Please wait a few minutes and try again!",
     macros: {
       Protein: "Protein",
       Carbs: "Carbs",
@@ -64,6 +69,8 @@ const translations: Record<string, any> = {
     aiAdvice: "AIのアドバイス",
     disclaimer: "推奨事項は参考用です • 画像に基づく精度",
     errorTitle: "エラーが発生しました",
+    overloadTitle: "AIシェフが少し忙しいようです! 👨‍🍳",
+    overloadMessage: "現在大変混み合っています。数分後にもう一度お試しください。",
     macros: {
       Protein: "タンパク質",
       Carbs: "炭水化物",
@@ -80,6 +87,8 @@ const translations: Record<string, any> = {
     aiAdvice: "AI 조언",
     disclaimer: "권장 사항은 참고용입니다 • 이미지 기반 정확도",
     errorTitle: "오류 발생",
+    overloadTitle: "AI 셰프가 조금 바쁘네요! 👨‍🍳",
+    overloadMessage: "현재 사용자가 많아 지연되고 있습니다. 잠시 후 다시 시도해주세요.",
     macros: {
       Protein: "단백질",
       Carbs: "탄수화물",
@@ -104,6 +113,39 @@ export default function ResultDisplay({ text, loading, error, language = 'Tiến
   }
 
   if (error) {
+    const isOverload = error.includes('503') || error.toLowerCase().includes('service unavailable') || error.toLowerCase().includes('high demand');
+    
+    if (isOverload) {
+      return (
+        <div className="w-full max-w-2xl glass-card p-10 border-blue-500/20 bg-blue-500/5 flex flex-col items-center text-center gap-6">
+          <motion.div 
+            animate={{ 
+              rotate: [0, -10, 10, -10, 0],
+              scale: [1, 1.1, 1]
+            }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center"
+          >
+            <Utensils className="w-10 h-10 text-blue-400" />
+          </motion.div>
+          <div className="space-y-2">
+            <h3 className="text-2xl font-black text-white">{t.overloadTitle}</h3>
+            <p className="text-white/60 text-base max-w-sm mx-auto leading-relaxed">
+              {t.overloadMessage}
+            </p>
+          </div>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-base font-black transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-500/20"
+          >
+            {language === 'Tiếng Việt' ? 'Thử lại ngay nào! 🚀' : 
+             language === 'English' ? 'Try again now! 🚀' :
+             language === '日本語' ? 'もう一度試す 🚀' : '다시 시도하기 🚀'}
+          </button>
+        </div>
+      );
+    }
+
     return (
       <div className="w-full max-w-2xl glass-card p-8 border-red-500/20 bg-red-500/5 flex items-start gap-4">
         <AlertCircle className="w-6 h-6 text-red-400 mt-1 flex-shrink-0" />
