@@ -13,6 +13,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [foodDescription, setFoodDescription] = useState('');
 
   const handleImageAnalysis = async (base64: string) => {
     setLoading(true);
@@ -20,7 +21,7 @@ export default function Home() {
     setResult(null);
 
     try {
-      const res = await analyzeImage(base64, selectedLanguage);
+      const res = await analyzeImage(base64, selectedLanguage, foodDescription);
       
       if (res.success) {
         setResult(res.text || '');
@@ -89,7 +90,20 @@ export default function Home() {
         </div>
 
         {/* Controls */}
-        <div className="mb-12">
+        <div className="flex flex-col items-center gap-6 mb-12 w-full max-w-2xl">
+          <div className="w-full">
+            <textarea
+              placeholder={
+                selectedLanguage === 'Tiếng Việt' ? "Thêm ghi chú (ví dụ: Bún bò thêm móng giò, phở ít bánh...)" :
+                selectedLanguage === 'English' ? "Add note (e.g., Extra beef Pho, less noodles...)" :
+                selectedLanguage === '日本語' ? "メモを追加 (例: 牛肉多めのフォー、麺少なめ...)" :
+                "메모 추가 (예: 소고기 추가 쌀국수, 면 적게...)"
+              }
+              value={foodDescription}
+              onChange={(e) => setFoodDescription(e.target.value)}
+              className="w-full h-24 p-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all resize-none glass-morphism"
+            />
+          </div>
           <LanguageSelector 
             selected={selectedLanguage} 
             onChange={setSelectedLanguage} 
@@ -103,6 +117,7 @@ export default function Home() {
             onReset={() => {
               setResult(null);
               setError(null);
+              setFoodDescription('');
             }} 
           />
           
