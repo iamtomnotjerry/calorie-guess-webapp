@@ -66,14 +66,12 @@ export async function analyzeImage(base64Image: string, language: string = 'Tiáº
     console.error('Redis Rate Limit error:', error);
   }
 
-  // Model rotation list based on your specific quotas:
-  // 1. Gemini 3 Flash (20 RPD) - High quality
-  // 2. Gemini 2.5 Flash (20 RPD) - High quality fallback
-  // 3. Gemini 3.1 Flash Lite (500 RPD) - High volume fallback
+  // ðŸš€ Model rotation updated based on your available_models.json:
   const MODELS = [
-    'gemini-3-flash-preview',
-    'gemini-2.5-flash',
-    'gemini-3.1-flash-lite'
+    'gemini-3.1-pro-preview',        // Top-tier reasoning
+    'gemini-3.1-flash-lite-preview',  // Fast and smart
+    'gemini-3-pro-preview',          // High quality backup
+    'gemini-2.5-flash'               // Stable fallback
   ];
 
   let lastError = null;
