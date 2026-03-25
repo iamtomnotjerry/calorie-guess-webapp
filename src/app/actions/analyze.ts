@@ -68,10 +68,11 @@ export async function analyzeImage(base64Image: string, language: string = 'Tiáº
 
   // ðŸš€ Model rotation updated based on your available_models.json:
   const MODELS = [
-    'gemini-3.1-pro-preview',        // Top-tier reasoning
-    'gemini-3.1-flash-lite-preview',  // Fast and smart
-    'gemini-3-pro-preview',          // High quality backup
-    'gemini-2.5-flash'               // Stable fallback
+    'gemini-3.1-pro-preview',        // Top-tier reasoning (Jan 2026)
+    'gemini-3.1-flash-lite-preview',  // Fast and smart (Mar 2026)
+    'gemini-3-flash-preview',        // Very fast mid-tier (Dec 2025)
+    'gemini-3-pro-preview',          // High quality backup (Nov 2025)
+    'gemini-2.5-flash'               // Stable fallback (Jun 2025)
   ];
 
   let lastError = null;
