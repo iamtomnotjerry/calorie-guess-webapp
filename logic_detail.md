@@ -43,8 +43,15 @@ Khi gặp lỗi **503 Service Unavailable** (Google quá tải cục bộ mọi 
 ## 5. 🤖 Cấu trúc Prompt "Chuyên gia Dinh dưỡng"
 Prompt được tối ưu hóa để ép AI trả về **JSON thuần túy**, bao gồm:
 - **Tên món:** Độ chính xác cao theo món ăn Việt/Quốc tế.
-- **Calo & Macros:** Ước lượng dựa trên khẩu phần thực tế nhìn thấy (không phóng đại).
-- **Đánh giá sức khỏe:** Ưu/Nhược điểm và lời khuyên thực tế từ chuyên gia.
+- Luôn tính đến gia vị, dầu ăn, nước sốt vì chúng góp phần không nhỏ vào calo.
+- Tất cả nội dung văn bản trong JSON phải bằng **tiếng Việt** tự nhiên, dễ hiểu.
+
+---
+
+## 6. 📝 Lớp 6: Nội dung bổ sung (Optional Context)
+Người dùng có thể nhập thêm mô tả (ví dụ: "Phở thêm thịt", "Cơm ít béo").
+- **Logic:** Nếu có nội dung nhập vào, hệ thống sẽ chèn trực tiếp vào Prompt gửi cho AI.
+- **Tác dụng:** Giúp AI nhận diện các thành phần "ẩn" hoặc các yêu cầu đặc biệt mà hình ảnh không thể hiện hết, từ đó tăng độ chính xác lên tối đa.
 
 ---
 *Tài liệu được cập nhật tự động bởi Antigravity AI.*
