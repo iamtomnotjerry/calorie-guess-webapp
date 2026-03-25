@@ -74,16 +74,26 @@ export async function analyzeImage(base64Image: string, language: string = 'Ti�
     'gemini-3-pro-preview',          // High quality backup (Nov 2025)
     'gemini-2.5-flash'               // Stable fallback (Jun 2025)
   ];
+  
+  // 🔑 Get all available API keys
+  const API_KEYS = [
+    process.env.GEMINI_API_KEY,
+    process.env.GEMINI_API_KEY_2,
+  ].filter(Boolean) as string[];
 
   let lastError = null;
 
+  // Outer loop: Models
   for (const modelName of MODELS) {
-    try {
-      console.log(`Attempting analysis with model: ${modelName}`);
-      const model = genAI.getGenerativeModel({ model: modelName });
+    // Inner loop: Try each API key for this model
+    for (const apiKey of API_KEYS) {
+      try {
+        console.log(`[Rotation] Model: ${modelName} | API Key: ${apiKey.substring(0, 8)}...`);
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: modelName });
 
-      const prompt = language === 'Tiếng Việt' 
-        ? `Bạn là chuyên gia dinh dưỡng người Việt Nam, rất am hiểu về món ăn Việt và cách ước lượng khẩu phần thực tế từ hình ảnh.
+        const prompt = language === 'Tiếng Việt' 
+          ? `Bạn là chuyên gia dinh dưỡng người Việt Nam, rất am hiểu về món ăn Việt và cách ước lượng khẩu phần thực tế từ hình ảnh.
 
 Hãy phân tích **chính xác** hình ảnh món ăn này dựa trên khẩu phần thực tế nhìn thấy (không được ước lượng quá cao, không phóng đại).
 
@@ -124,7 +134,7 @@ Quy tắc quan trọng:
 - Luôn tính đến gia vị, dầu ăn, nước sốt vì chúng góp phần không nhỏ vào calo.
 - Tất cả nội dung văn bản trong JSON phải bằng **tiếng Việt** tự nhiên, dễ hiểu.
 - Nếu không chắc chắn về một chi tiết, hãy đưa ra ước lượng hợp lý thay vì đoán mò quá xa.`
-        : `You are a professional nutritionist with deep knowledge of food portion estimation from images.
+          : `You are a professional nutritionist with deep knowledge of food portion estimation from images.
 
 Analyze this food image **accurately** based on the visible real portion size. Do NOT overestimate calories or macros.
 
@@ -165,46 +175,47 @@ Important rules:
 - All text inside the JSON must be in ${language}.
 - Be realistic and conservative with calorie estimation.`;
 
-      const result = await model.generateContent([
-        prompt,
-        {
-          inlineData: {
-            data: base64Image.split(',')[1],
-            mimeType: 'image/jpeg',
+        const result = await model.generateContent([
+          prompt,
+          {
+            inlineData: {
+              data: base64Image.split(',')[1],
+              mimeType: 'image/jpeg',
+            },
           },
-        },
-      ]);
+        ]);
 
-      const response = await result.response;
-      console.log(`Analysis successful with model: ${modelName}`);
-      return { success: true, text: response.text() };
+        const response = await result.response;
+        console.log(`>>> SUCCESS: Account ending in ...${apiKey.slice(-4)} | Model: ${modelName}`);
+        return { success: true, text: response.text() };
 
-    } catch (error: any) {
-      lastError = error;
-      const errMsg = error.message || '';
-      const status = error.status || 0;
+      } catch (error: any) {
+        lastError = error;
+        const errMsg = error.message || '';
+        const status = error.status || 0;
 
-      // Rotate model on: Rate Limit (429), Model Not Found (404), or Service Unavailable (503)
-      if (
-        status === 429 || status === 404 || status === 503 ||
-        errMsg.includes('429') || errMsg.includes('404') || errMsg.includes('503') ||
-        errMsg.toLowerCase().includes('too many requests') ||
-        errMsg.toLowerCase().includes('service unavailable') ||
-        errMsg.toLowerCase().includes('high demand') ||
-        errMsg.toLowerCase().includes('not found')
-      ) {
-        console.warn(`Model ${modelName} issue: ${errMsg}. Trying next model in rotation...`);
-        continue;
+        // Rotate on: Rate Limit (429), Model Not Found (404), or Service Unavailable (503)
+        if (
+          status === 429 || status === 503 || status === 404 ||
+          errMsg.includes('429') || errMsg.includes('503') || errMsg.includes('404') ||
+          errMsg.toLowerCase().includes('too many requests') ||
+          errMsg.toLowerCase().includes('service unavailable') ||
+          errMsg.toLowerCase().includes('high demand')
+        ) {
+          console.warn(`[Fallback] Account ...${apiKey.slice(-4)} failed for ${modelName}. Error: ${errMsg.substring(0, 50)}...`);
+          // Continue to next API KEY or next MODEL
+          continue; 
+        }
+
+        // Fatal error, log and stop
+        console.error(`!!! Fatal error with key ending in ...${apiKey.slice(-4)}:`, errMsg);
+        break; 
       }
-
-      // For fatal/unexpected errors, log and stop
-      console.error(`Fatal error with model ${modelName}:`, errMsg);
-      break; 
     }
   }
 
   return { 
     success: false, 
-    error: lastError?.message || 'Không thể kết nối với bất kỳ model AI nào. Vui lòng thử lại sau.' 
+    error: lastError?.message || 'Không thể kết nối với bất kỳ model AI nào (sau khi thử tất cả Acc & Model). Vui lòng thử lại sau.' 
   };
 }
